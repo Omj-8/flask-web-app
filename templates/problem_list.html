@@ -1,0 +1,24 @@
+<!-- templates/problem_list.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>問題一覧</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>問題一覧</h1>
+
+    {% for problem in problems %}
+        <div class="problem-card">
+            <h2>{{ problem.title }}</h2>
+            <p>{{ problem.description[:100] }}...</p>
+            {% if problem.image_filename %}
+                <img src="{{ url_for('static', filename='images/' + problem.image_filename) }}" alt="問題画像" width="200">
+            {% endif %}
+            <br>
+            <a href="{{ url_for('problem_detail', problem_id=problem.id) }}">詳細を見る</a>
+        </div>
+        <hr>
+    {% endfor %}
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!-- templates/stats.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>統計: {{ problem.title }}</title>
+</head>
+<body>
+    <h1>{{ problem.title }} の投票結果</h1>
+
+    {% if total_votes == 0 %}
+        <p>まだ誰も投票していません。</p>
+    {% else %}
+        <ul>
+            {% for tile, count in vote_counts.items() %}
+                <li>{{ tile }}: {{ count }} 票 ({{ (count / total_votes * 100) | round(1) }}%)</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <a href="{{ url_for('problem_list') }}">← 問題一覧へ</a>
+</body>
+</html>

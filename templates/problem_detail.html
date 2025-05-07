@@ -1,0 +1,27 @@
+<!-- templates/problem_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ problem.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>{{ problem.title }}</h1>
+
+    {% if problem.image_filename %}
+        <img src="{{ url_for('static', filename='images/' + problem.image_filename) }}" alt="問題画像" width="300">
+    {% endif %}
+
+    <p>{{ problem.description }}</p>
+
+    <form method="POST">
+        <label>どの牌を切りますか？（仮の選択肢）</label><br>
+        <input type="radio" name="tile" value="1m" required> 1萬<br>
+        <input type="radio" name="tile" value="2m"> 2萬<br>
+        <input type="radio" name="tile" value="3m"> 3萬<br>
+        <input type="submit" value="送信">
+    </form>
+
+    <a href="{{ url_for('problem_list') }}">← 問題一覧へ戻る</a>
+</body>
+</html>

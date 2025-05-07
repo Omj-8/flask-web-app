@@ -6,6 +6,8 @@ import os
 
 from models import db, User
 from forms import RegistrationForm, LoginForm
+from models import Problem
+from models import db, User, Problem, Vote
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -64,6 +66,60 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route("/problems")
+@login_required
+def problem_list():
+    problems = Problem.query.all()
+    return render_template("problem_list.html", problems=problems)
+
+@app.route("/problem/<int:problem_id>", methods=['GET', 'POST'])
+@login_required
+def problem_detail(problem_id):
+    problem = Problem.query.get_or_404(problem_id)
+
+    # POSTで回答を受け取った場合（今は未実装：後でDB保存機能追加予定）
+    if request.method == 'POST':
+        selected_tile = request.form.get('tile')  # 'tile' は form の name 属性
+        flash(f"{selected_tile} を切るを選びました（仮実装）", 'success')
+        return redirect(url_for('problem_list'))
+
+    return render_template('problem_detail.html', problem=problem)
+
+@app.route("/problem/<int:problem_id>", methods=['GET', 'POST'])
+@login_required
+def problem_detail(problem_id):
+    problem = Problem.query.get_or_404(problem_id)
+
+    if request.method == 'POST':
+        selected_tile = request.form.get('tile')
+        if selected_tile:
+            # 既に投票済みかチェック（1人1回答制）
+            existing_vote = Vote.query.filter_by(user_id=current_user.id, problem_id=problem.id).first()
+            if existing_vote:
+                flash('すでにこの問題に回答済みです。', 'warning')
+            else:
+                vote = Vote(user_id=current_user.id, problem_id=problem.id, selected_tile=selected_tile)
+                db.session.add(vote)
+                db.session.commit()
+                flash(f"{selected_tile} を選択しました。", 'success')
+        return redirect(url_for('stats', problem_id=problem.id))
+
+    return render_template('problem_detail.html', problem=problem)
+
+@app.route("/stats/<int:problem_id>")
+@login_required
+def stats(problem_id):
+    problem = Problem.query.get_or_404(problem_id)
+    votes = Vote.query.filter_by(problem_id=problem.id).all()
+
+    vote_counts = {}
+    for vote in votes:
+        vote_counts[vote.selected_tile] = vote_counts.get(vote.selected_tile, 0) + 1
+
+    total_votes = len(votes)
+    return render_template("stats.html", problem=problem, vote_counts=vote_counts, total_votes=total_votes)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
