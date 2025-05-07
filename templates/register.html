@@ -9,6 +9,7 @@
     <h2>Register</h2>
     <form method="POST">
         {{ form.hidden_tag() }}
+
         <p>
             {{ form.username.label }}<br>
             {{ form.username(size=20) }}<br>
@@ -16,6 +17,7 @@
                 <span style="color: red;">[{{ error }}]</span><br>
             {% endfor %}
         </p>
+
         <p>
             {{ form.email.label }}<br>
             {{ form.email(size=20) }}<br>
@@ -23,6 +25,7 @@
                 <span style="color: red;">[{{ error }}]</span><br>
             {% endfor %}
         </p>
+
         <p>
             {{ form.password.label }}<br>
             {{ form.password(size=20) }}<br>
@@ -30,7 +33,16 @@
                 <span style="color: red;">[{{ error }}]</span><br>
             {% endfor %}
         </p>
-        <p><button type="submit">Register</button></p>
+
+        <p>
+            {{ form.confirm_password.label }}<br>
+            {{ form.confirm_password(size=20) }}<br>
+            {% for error in form.confirm_password.errors %}
+                <span style="color: red;">[{{ error }}]</span><br>
+            {% endfor %}
+        </p>
+
+        <p>{{ form.submit() }}</p>
     </form>
 </body>
 </html>

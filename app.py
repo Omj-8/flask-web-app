@@ -37,19 +37,21 @@ def index():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        hashed_password = generate_password_hash(form.password.data, method='pbkdf2:sha256')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
+        print(f"User {user.username} registered with email {user.email}")
+
         flash('Your account has been created!', 'success')
         login_user(user)
-        return redirect(url_for('index'))
+        return redirect(url_for('index'))  # 新規登録後にホーム画面に遷移
     return render_template('register.html', form=form)
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('problem_list'))  # ログイン済みなら問題一覧に遷移
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -57,9 +59,9 @@ def login():
             login_user(user)
             next_page = request.args.get('next')
             flash('Login successful!', 'success')
-            return redirect(next_page) if next_page else redirect(url_for('index'))
+            return redirect(next_page) if next_page else redirect(url_for('problem_list'))  # login後に問題一覧へ遷移
         else:
-            flash('Login unsuccessful. Please check email and password.', 'danger')
+            flash('Login unsuccessful. Please check email and password.', 'danger')  # ログイン失敗時
     return render_template('login.html', form=form)
 
 @app.route("/logout")
