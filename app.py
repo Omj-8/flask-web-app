@@ -41,12 +41,11 @@ def register():
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        print(f"User {user.username} registered with email {user.email}")
-
-        flash('Your account has been created!', 'success')
-        login_user(user)
-        return redirect(url_for('index'))  # 新規登録後にホーム画面に遷移
+        flash('Your account has been created! Please log in.', 'success')
+        # 自動ログインをやめてログインページへ
+        return redirect(url_for('login'))
     return render_template('register.html', form=form)
+
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
