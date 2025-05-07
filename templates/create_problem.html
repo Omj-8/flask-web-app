@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>問題作成</title>
+</head>
+<body>
+    <h2>問題作成</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title(size=20) }}<br>
+        </p>
+
+        <p>
+            {{ form.description.label }}<br>
+            {{ form.description(size=20) }}<br>
+        </p>
+
+        <p>
+            {{ form.tile_options.label }}<br>
+            {{ form.tile_options(size=20) }}<br>
+        </p>
+
+        <p>{{ form.submit() }}</p>
+    </form>
+</body>
+</html>

@@ -18,15 +18,13 @@ class User(db.Model, UserMixin):
 class Problem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    image_filename = db.Column(db.String(100))  # 手牌画像のファイル名（任意）
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    description = db.Column(db.String(500), nullable=True)
+    tile_options = db.Column(db.String(200), nullable=False)  # ここを追加
 
-    # 投稿者（ホスト）を紐付ける場合
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-
-    def __repr__(self):
-        return f"Problem('{self.title}')"
+    def __init__(self, title, description, tile_options):
+        self.title = title
+        self.description = description
+        self.tile_options = tile_options  # tile_optionsを保存する
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)

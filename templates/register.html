@@ -42,6 +42,11 @@
             {% endfor %}
         </p>
 
+        <!-- ここにホストとして登録するチェックボックスを追加 -->
+        <p>
+            {{ form.is_host.label }} {{ form.is_host() }}<br>
+        </p>
+
         <p>{{ form.submit() }}</p>
     </form>
 </body>

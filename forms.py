@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms import BooleanField
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[
@@ -16,6 +17,8 @@ class RegistrationForm(FlaskForm):
         DataRequired(), EqualTo('password', message='Passwords must match.')
     ])
     submit = SubmitField('Sign Up')
+    
+    is_host = BooleanField('ホストとして登録する')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[
@@ -25,3 +28,9 @@ class LoginForm(FlaskForm):
         DataRequired()
     ])
     submit = SubmitField('Login')
+    
+class ProblemForm(FlaskForm):
+    title = StringField('タイトル', validators=[DataRequired()])
+    description = StringField('説明', validators=[DataRequired()])
+    tile_options = StringField('選択肢（カンマ区切り）', validators=[DataRequired()])
+    submit = SubmitField('問題を作成')

@@ -5,9 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 from models import db, User
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, ProblemForm
 from models import Problem
 from models import db, User, Problem, Vote
+from functools import wraps
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -38,7 +39,7 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data, method='pbkdf2:sha256')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password, is_host=form.is_host.data)
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! Please log in.', 'success')
@@ -108,6 +109,47 @@ def stats(problem_id):
 
     total_votes = len(votes)
     return render_template("stats.html", problem=problem, vote_counts=vote_counts, total_votes=total_votes)
+
+def host_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_host:
+            flash("ホストユーザーのみがアクセス可能です。", "danger")
+            return redirect(url_for('problem_list'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route("/create_problem", methods=['GET', 'POST'])
+@login_required
+@host_required
+def create_problem():
+    form = ProblemForm()  # フォームをインスタンス化
+
+    if form.validate_on_submit():  # フォームが送信され、バリデーションが成功した場合
+        title = form.title.data
+        description = form.description.data
+        options_raw = form.tile_options.data  # カンマ区切り文字列
+        options = [opt.strip() for opt in options_raw.split(',') if opt.strip()]
+
+        if not title or not description or not options:
+            flash("すべての項目を入力してください。", "warning")
+            return redirect(url_for('create_problem'))
+
+        # Problemインスタンスの作成
+        new_problem = Problem(
+            title=title,
+            description=description,
+            tile_options=','.join(options)
+        )
+        db.session.add(new_problem)
+        db.session.commit()
+        flash("新しい問題を作成しました！", "success")
+        return redirect(url_for('problem_list'))
+
+    return render_template("create_problem.html", form=form)  # formをテンプレートに渡す
+
+
+
 
 
 if __name__ == '__main__':
