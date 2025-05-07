@@ -1,28 +1,32 @@
-from flask import Flask, render_template, url_for, flash, redirect
+from flask import Flask, render_template, url_for, flash, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, current_user, login_required, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import os
 
 from models import db, User
 from forms import RegistrationForm, LoginForm
 
-# Flaskアプリの作成と設定
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/app.db'
 
-# DBの初期化
+# 安定したパス指定
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'instance', 'app.db')
+
+# DB初期化
 db.init_app(app)
 
-# Flask-Login設定
+# LoginManager初期化
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'info'
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ルート定義
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -49,8 +53,9 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
+            next_page = request.args.get('next')
             flash('Login successful!', 'success')
-            return redirect(url_for('index'))
+            return redirect(next_page) if next_page else redirect(url_for('index'))
         else:
             flash('Login unsuccessful. Please check email and password.', 'danger')
     return render_template('login.html', form=form)
